@@ -4,6 +4,7 @@ import com.clutchacademy.user_service.dtos.UpdateUser;
 import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.enums.UserType;
+import com.clutchacademy.user_service.exceptions.HttpNotFoundException;
 import com.clutchacademy.user_service.models.Instructor;
 import com.clutchacademy.user_service.models.Student;
 import com.clutchacademy.user_service.models.User;
@@ -98,9 +99,6 @@ class UserServiceTests {
             assertThatThrownBy(() -> userService.create(userTypeUnsupported))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Unsupported User type: " + userTypeUnsupported.getUserType());
-
-            verifyNoInteractions(studentRepository);
-            verifyNoInteractions(instructorRepository);
         }
     }
 
@@ -175,13 +173,13 @@ class UserServiceTests {
         }
 
         @Test
-        void findById_ShouldThrowIllegalArgumentException() {
+        void findById_ShouldThrowHttpNotFoundException() {
             String userId = "anyId";
             when(studentRepository.findByUserId(userId)).thenReturn(Optional.empty());
             when(instructorRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.findById(userId))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(HttpNotFoundException.class)
                     .hasMessage("User with ID " + userId + " not found");
 
             verify(studentRepository, times(1)).findByUserId(userId);

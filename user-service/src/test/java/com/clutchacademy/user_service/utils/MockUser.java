@@ -24,14 +24,17 @@ public class MockUser {
                 mock.setFirstName("John");
                 mock.setLastName("Doe");
                 mock.setUserType(userType);
+                mock.setEmail("test@mail.com");
             }
             case USER_TYPE_NULL -> {
                 mock.setFirstName("John");
                 mock.setLastName("Doe");
+                mock.setEmail("test@mail.com");
             }
             case UNSUPPORTED_USER_TYPE -> {
                 mock.setFirstName("John");
                 mock.setLastName("Doe");
+                mock.setEmail("test@mail.com");
                 mock.setUserType(UserType.valueOf("UNKNOWN"));
             }
         }
@@ -46,6 +49,7 @@ public class MockUser {
         mock.setFirstName("John");
         mock.setLastName("Doe");
         mock.setActive(true);
+        mock.setEmail("test@mail.com");
 
         return mock;
     }
@@ -57,6 +61,7 @@ public class MockUser {
         mock.setFirstName("John");
         mock.setLastName("Doe");
         mock.setActive(true);
+        mock.setEmail("test@mail.com");
 
         return mock;
     }
@@ -66,6 +71,7 @@ public class MockUser {
 
         mock.setFirstName("Jane");
         mock.setLastName("Smith");
+        mock.setEmail("test@mail.com");
 
         return mock;
     }

@@ -1,6 +1,7 @@
 package com.clutchacademy.user_service.utils;
 
 import com.clutchacademy.user_service.dtos.UpdateUser;
+import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.enums.UserType;
 import com.clutchacademy.user_service.models.Instructor;
 import com.clutchacademy.user_service.models.Student;
@@ -15,20 +16,14 @@ public class MockUser {
         UNSUPPORTED_USER_TYPE
     }
 
-    public static Student getMockStudent(MockType mockType) {
-        Student mock = new Student();
+    public static UserRequest getMockUserRequest(MockType mockType, UserType userType) {
+        UserRequest mock = new UserRequest();
 
         switch (mockType) {
             case PAYLOAD -> {
                 mock.setFirstName("John");
                 mock.setLastName("Doe");
-                mock.setType(UserType.STUDENT);
-            }
-            case FROM_DB -> {
-                mock.setUserId("STU-123456");
-                mock.setFirstName("John");
-                mock.setLastName("Doe");
-                mock.setActive(true);
+                mock.setUserType(userType);
             }
             case USER_TYPE_NULL -> {
                 mock.setFirstName("John");
@@ -37,29 +32,31 @@ public class MockUser {
             case UNSUPPORTED_USER_TYPE -> {
                 mock.setFirstName("John");
                 mock.setLastName("Doe");
-                mock.setType(UserType.valueOf("UNKNOWN"));
+                mock.setUserType(UserType.valueOf("UNKNOWN"));
             }
         }
 
         return mock;
     }
 
-    public static Instructor getMockInstructor(MockType type) {
+    public static Student getMockStudent() {
+        Student mock = new Student();
+
+        mock.setUserId("STU-123456");
+        mock.setFirstName("John");
+        mock.setLastName("Doe");
+        mock.setActive(true);
+
+        return mock;
+    }
+
+    public static Instructor getMockInstructor() {
         Instructor mock = new Instructor();
 
-        switch (type) {
-            case PAYLOAD -> {
-                mock.setFirstName("John");
-                mock.setLastName("Doe");
-                mock.setType(UserType.INSTRUCTOR);
-            }
-            case FROM_DB -> {
-                mock.setUserId("INS-123456");
-                mock.setFirstName("John");
-                mock.setLastName("Doe");
-                mock.setActive(true);
-            }
-        }
+        mock.setUserId("INS-123456");
+        mock.setFirstName("John");
+        mock.setLastName("Doe");
+        mock.setActive(true);
 
         return mock;
     }

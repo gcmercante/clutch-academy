@@ -1,8 +1,11 @@
 package com.clutchacademy.user_service.controllers;
 
 import com.clutchacademy.user_service.dtos.UpdateUser;
-import com.clutchacademy.user_service.models.User;
+import com.clutchacademy.user_service.dtos.UserRequest;
+import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.services.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,19 +24,23 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody User user) {
+    public ResponseEntity<Void> create(
+            @RequestBody
+            @Valid
+            UserRequest user
+    ) {
         userService.create(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping
-    public List<User> find() {
+    public List<UserResponse> find() {
         return userService.find();
     }
 
     @GetMapping("/{userId}")
-    public User findById(@PathVariable String userId) {
+    public UserResponse findById(@PathVariable String userId) {
         return userService.findById(userId);
     }
 
@@ -41,6 +48,7 @@ public class UserController {
     public ResponseEntity<Void> update(
             @PathVariable
             String userId,
+            @Valid
             @RequestBody
             UpdateUser userToUpdate
     ) {

@@ -1,6 +1,9 @@
 package com.clutchacademy.user_service.service;
 
 import com.clutchacademy.user_service.dtos.UpdateUser;
+import com.clutchacademy.user_service.dtos.UserRequest;
+import com.clutchacademy.user_service.dtos.UserResponse;
+import com.clutchacademy.user_service.enums.UserType;
 import com.clutchacademy.user_service.models.Instructor;
 import com.clutchacademy.user_service.models.Student;
 import com.clutchacademy.user_service.models.User;
@@ -31,12 +34,12 @@ class UserServiceTests {
     @Mock
     private InstructorRepository instructorRepository;
 
-    private final Student studentPayload = MockUser.getMockStudent(MockUser.MockType.PAYLOAD);
-    private final Student student = MockUser.getMockStudent(MockUser.MockType.FROM_DB);
-    private final Instructor instructorPayload = MockUser.getMockInstructor(MockUser.MockType.PAYLOAD);
-    private final Instructor instructor = MockUser.getMockInstructor(MockUser.MockType.FROM_DB);
-    private final User userTypeNull = MockUser.getMockStudent(MockUser.MockType.USER_TYPE_NULL);
-    private final User userTypeUnsupported = MockUser.getMockStudent(MockUser.MockType.UNSUPPORTED_USER_TYPE);
+    private final UserRequest studentPayload = MockUser.getMockUserRequest(MockUser.MockType.PAYLOAD, UserType.STUDENT);
+    private final Student student = MockUser.getMockStudent();
+    private final UserRequest instructorPayload = MockUser.getMockUserRequest(MockUser.MockType.PAYLOAD, UserType.INSTRUCTOR);
+    private final Instructor instructor = MockUser.getMockInstructor();
+    private final UserRequest userTypeNull = MockUser.getMockUserRequest(MockUser.MockType.USER_TYPE_NULL, UserType.UNKNOWN);
+    private final UserRequest userTypeUnsupported = MockUser.getMockUserRequest(MockUser.MockType.UNSUPPORTED_USER_TYPE, UserType.UNKNOWN);
     private final UpdateUser updateUser = MockUser.getMockUpdateUser();
 
     @InjectMocks
@@ -94,7 +97,7 @@ class UserServiceTests {
         void create_ShouldThrowIllegalArgumentException_WhenUserTypeIsUnsupported() {
             assertThatThrownBy(() -> userService.create(userTypeUnsupported))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Unsupported User type: " + userTypeUnsupported.getType());
+                    .hasMessage("Unsupported User type: " + userTypeUnsupported.getUserType());
 
             verifyNoInteractions(studentRepository);
             verifyNoInteractions(instructorRepository);
@@ -148,11 +151,11 @@ class UserServiceTests {
             String userId = student.getUserId();
             when(studentRepository.findByUserId(userId)).thenReturn(Optional.of(student));
 
-            Student returnedStudent = (Student) userService.findById(userId);
+            UserResponse returnedStudent = userService.findById(userId);
 
             assertThat(returnedStudent.getUserId()).isEqualTo(userId);
             assertThat(returnedStudent.getUserId()).startsWith("STU");
-            assertThat(returnedStudent).isInstanceOf(Student.class);
+            assertThat(returnedStudent).isInstanceOf(UserResponse.class);
 
             verify(studentRepository, times(1)).findByUserId(student.getUserId());
         }
@@ -162,11 +165,11 @@ class UserServiceTests {
             String userId = instructor.getUserId();
             when(instructorRepository.findByUserId(userId)).thenReturn(Optional.of(instructor));
 
-            Instructor returnedStudent = (Instructor) userService.findById(userId);
+            UserResponse returnedStudent = userService.findById(userId);
 
             assertThat(returnedStudent.getUserId()).isEqualTo(userId);
             assertThat(returnedStudent.getUserId()).startsWith("INS");
-            assertThat(returnedStudent).isInstanceOf(Instructor.class);
+            assertThat(returnedStudent).isInstanceOf(UserResponse.class);
 
             verify(instructorRepository, times(1)).findByUserId(instructor.getUserId());
         }
@@ -193,7 +196,7 @@ class UserServiceTests {
             when(studentRepository.findAll()).thenReturn(List.of(student));
             when(instructorRepository.findAll()).thenReturn(List.of(instructor));
 
-            List<User> users = userService.find();
+            List<UserResponse> users = userService.find();
 
             assertThat(users).isNotEmpty();
             assertThat(users.size()).isEqualTo(2);
@@ -208,7 +211,7 @@ class UserServiceTests {
             when(studentRepository.findAll()).thenReturn(List.of());
             when(instructorRepository.findAll()).thenReturn(List.of());
 
-            List<User> users = userService.find();
+            List<UserResponse> users = userService.find();
 
             assertThat(users).isEmpty();
 

@@ -1,7 +1,10 @@
 package com.clutchacademy.user_service.services;
 
 import com.clutchacademy.user_service.dtos.UpdateUser;
+import com.clutchacademy.user_service.dtos.UserRequest;
+import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.enums.UserType;
+import com.clutchacademy.user_service.exceptions.HttpNotFoundException;
 import com.clutchacademy.user_service.models.Instructor;
 import com.clutchacademy.user_service.models.Student;
 import com.clutchacademy.user_service.models.User;
@@ -10,7 +13,9 @@ import com.clutchacademy.user_service.repositories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,17 +35,25 @@ public class UserService {
         this.instructorRepository = instructorRepository;
     }
 
-    public User create(User user) {
+    public User create(UserRequest user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
 
-        if (user.getType() == null) {
+        if (user.getUserType() == null) {
             throw new IllegalArgumentException("User type must be defined");
         }
 
+        Optional<User> optionalUser= studentRepository.findByEmail(user.getEmail())
+                .map(u -> (User) u)
+                .or(() -> instructorRepository.findByUserId(user.getEmail()));
+
+        if (optionalUser.isPresent()) {
+            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
+        }
+
         // TODO: Change that switch to a Factory
-        switch (user.getType()) {
+        switch (user.getUserType()) {
             case STUDENT -> {
                 Student student = new Student();
                 mapCommonFields(user, student);
@@ -55,7 +68,7 @@ public class UserService {
                 return instructorRepository.save(instructor);
             }
 
-            default -> throw new IllegalArgumentException("Unsupported User type: " + user.getType());
+            default -> throw new IllegalArgumentException("Unsupported User type: " + user.getUserType());
         }
     }
 
@@ -69,8 +82,23 @@ public class UserService {
         }
 
         User user = optionalUser.get();
-        user.setFirstName(updateUser.getFirstName());
-        user.setLastName(updateUser.getLastName());
+
+        Field[] fields = UpdateUser.class.getDeclaredFields();
+
+        for (Field field : fields) {
+            try {
+                field.setAccessible(true);
+                Object value = field.get(updateUser);
+
+                if(value != null) {
+                    Field userField = User.class.getDeclaredField(field.getName());
+                    userField.setAccessible(true);
+                    userField.set(user, value);
+                }
+            } catch (NoSuchFieldError | IllegalAccessException | NoSuchFieldException exception) {
+                throw new RuntimeException("Error updating user field: " + field.getName(), exception);
+            }
+        }
 
         if (user instanceof Student) {
             return studentRepository.save((Student) user);
@@ -79,16 +107,18 @@ public class UserService {
         }
     }
 
-    public User findById(String userId) {
+    public UserResponse findById(String userId) {
         Optional<User> optionalUser = studentRepository.findByUserId(userId)
                 .map(user -> (User) user)
                 .or(() -> instructorRepository.findByUserId(userId));
 
         if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("User with ID " + userId + " not found");
+            throw new HttpNotFoundException("User with ID " + userId + " not found");
         }
 
-        return optionalUser.get();
+        User user = optionalUser.get();
+
+        return mapUserResponse(user);
     }
 
     public User disable(String userId) {
@@ -110,23 +140,36 @@ public class UserService {
         }
     }
 
-    public List<User> find() {
+    public List<UserResponse> find() {
         List<Student> students = studentRepository.findAll();
         List<Instructor> instructors = instructorRepository.findAll();
 
-        return Stream.concat(students.stream(), instructors.stream())
-                .collect(Collectors.toList());
+        return Stream.concat(students.stream().map(this::mapUserResponse),
+                instructors.stream().map(this::mapUserResponse)).collect(Collectors.toList());
     }
 
-    private void mapCommonFields(User source, User target) {
-        target.setUserId(generateUserId(source.getType()));
+    private void mapCommonFields(UserRequest source, User target) {
+        target.setUserId(generateUserId(source.getUserType()));
         target.setFirstName(source.getFirstName());
         target.setLastName(source.getLastName());
         target.setActive(true);
+        target.setEmail(source.getEmail());
+    }
+
+    // TODO: put that mapper into a mappers folder as a static function
+    private UserResponse mapUserResponse(User source) {
+        return UserResponse
+                .builder()
+                .userId(source.getUserId())
+                .firstName(source.getFirstName())
+                .lastName(source.getLastName())
+                .active(source.getActive())
+                .email(source.getEmail())
+                .build();
     }
 
     private String generateUserId(UserType userType) {
         String prefix = userType == UserType.STUDENT ? "STU-" : "INS-";
-        return prefix + UUID.randomUUID().toString().substring(0, 8);
+        return prefix + UUID.randomUUID();
     }
 }

@@ -1,10 +1,14 @@
 package com.clutchacademy.user_service.dtos;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class UpdateUser {
+@Builder
+public class UserResponse {
+    private String userId;
     private String firstName;
     private String lastName;
+    private Boolean active;
     private String email;
 }

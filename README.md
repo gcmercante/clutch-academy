@@ -19,11 +19,10 @@
 - Spring Boot 3
 - PostgreSQL
 ### TODO
-- Testes de integração
-- Cobrir todos os casos de exceção
 - Autenticação (quando auth-service estiver pronto)
     - Alterar endpoints GET para retornar os resultados baseado na autenticação
 - Monitoramento (quando monitoring-service estiver pronto)
+- Lidar com as rotas de Admins
 
 ## auth-service (keycloak?)
 ### Responsabilidades

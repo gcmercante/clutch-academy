@@ -10,6 +10,7 @@ import com.clutchacademy.user_service.models.Student;
 import com.clutchacademy.user_service.models.User;
 import com.clutchacademy.user_service.repositories.InstructorRepository;
 import com.clutchacademy.user_service.repositories.StudentRepository;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public class UserService {
         this.instructorRepository = instructorRepository;
     }
 
-    public User create(UserRequest user) {
+    public UserResponse create(UserRequest user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
@@ -45,11 +46,10 @@ public class UserService {
         }
 
         Optional<User> optionalUser= studentRepository.findByEmail(user.getEmail())
-                .map(u -> (User) u)
                 .or(() -> instructorRepository.findByUserId(user.getEmail()));
 
         if (optionalUser.isPresent()) {
-            throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
+            throw new EntityExistsException("User with email " + user.getEmail() + " already exists");
         }
 
         // TODO: Change that switch to a Factory
@@ -58,27 +58,27 @@ public class UserService {
                 Student student = new Student();
                 mapCommonFields(user, student);
 
-                return studentRepository.save(student);
+                return mapUserResponse(studentRepository.save(student));
             }
 
             case INSTRUCTOR -> {
                 Instructor instructor = new Instructor();
                 mapCommonFields(user, instructor);
 
-                return instructorRepository.save(instructor);
+                return mapUserResponse(instructorRepository.save(instructor));
             }
 
             default -> throw new IllegalArgumentException("Unsupported User type: " + user.getUserType());
         }
     }
 
-    public User update(String userId, UpdateUser updateUser) {
+    public UserResponse update(String userId, UpdateUser updateUser) {
         Optional<User> optionalUser = studentRepository.findByUserId(userId)
                 .map(user -> (User) user)
                 .or(() -> instructorRepository.findByUserId(userId));
 
         if (optionalUser.isEmpty()) {
-           throw new IllegalArgumentException("User with ID " + userId + " not found");
+           throw new HttpNotFoundException("User with ID " + userId + " not found");
         }
 
         User user = optionalUser.get();
@@ -101,9 +101,9 @@ public class UserService {
         }
 
         if (user instanceof Student) {
-            return studentRepository.save((Student) user);
+            return mapUserResponse(studentRepository.save((Student) user));
         } else {
-            return instructorRepository.save((Instructor) user);
+            return mapUserResponse(instructorRepository.save((Instructor) user));
         }
     }
 
@@ -127,7 +127,7 @@ public class UserService {
                 .or(() -> instructorRepository.findByUserId(userId));
 
         if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("User with ID " + userId + " not found");
+            throw new HttpNotFoundException("User with ID " + userId + " not found");
         }
 
         User user = optionalUser.get();

@@ -7,7 +7,6 @@ import com.clutchacademy.user_service.enums.UserType;
 import com.clutchacademy.user_service.exceptions.HttpNotFoundException;
 import com.clutchacademy.user_service.models.Instructor;
 import com.clutchacademy.user_service.models.Student;
-import com.clutchacademy.user_service.models.User;
 import com.clutchacademy.user_service.repositories.InstructorRepository;
 import com.clutchacademy.user_service.repositories.StudentRepository;
 import com.clutchacademy.user_service.services.UserService;
@@ -52,9 +51,8 @@ class UserServiceTests {
         void create_ShouldCreateStudent_WhenUserTypeIsStudent() {
             when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            User result = userService.create(studentPayload);
+            UserResponse result = userService.create(studentPayload);
 
-            assertThat(result).isInstanceOf(Student.class);
             assertThat(result.getUserId()).startsWith("STU-");
             assertThat(result.getActive()).isTrue();
 
@@ -65,9 +63,8 @@ class UserServiceTests {
         void create_ShouldCreateInstructor_WhenUserTypeIsInstructor() {
             when(instructorRepository.save(any(Instructor.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            User result = userService.create(instructorPayload);
+            UserResponse result = userService.create(instructorPayload);
 
-            assertThat(result).isInstanceOf(Instructor.class);
             assertThat(result.getUserId()).startsWith("INS-");
             assertThat(result.getActive()).isTrue();
 
@@ -109,7 +106,7 @@ class UserServiceTests {
             when(studentRepository.findByUserId(student.getUserId())).thenReturn(Optional.of(student));
             when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            Student updatedStudent = (Student) userService.update(student.getUserId(), updateUser);
+            UserResponse updatedStudent = userService.update(student.getUserId(), updateUser);
 
             assertThat(updatedStudent.getFirstName()).isEqualTo(updateUser.getFirstName());
             assertThat(updatedStudent.getLastName()).isEqualTo(updateUser.getLastName());
@@ -121,7 +118,7 @@ class UserServiceTests {
             when(instructorRepository.findByUserId(instructor.getUserId())).thenReturn(Optional.of(instructor));
             when(instructorRepository.save(any(Instructor.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            Instructor updatedInstructor = (Instructor) userService.update(instructor.getUserId(), updateUser);
+            UserResponse updatedInstructor = userService.update(instructor.getUserId(), updateUser);
 
             assertThat(updatedInstructor.getFirstName()).isEqualTo(updateUser.getFirstName());
             assertThat(updatedInstructor.getLastName()).isEqualTo(updateUser.getLastName());
@@ -134,7 +131,7 @@ class UserServiceTests {
             when(instructorRepository.findByUserId("someId")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.update("someId", updateUser))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(HttpNotFoundException.class)
                     .hasMessageContaining("User with ID someId not found");
 
             verify(studentRepository, times(1)).findByUserId("someId");
@@ -259,7 +256,7 @@ class UserServiceTests {
             when(instructorRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.disable(userId))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(HttpNotFoundException.class)
                     .hasMessage("User with ID " + userId + " not found");
 
             verify(studentRepository, times(1)).findByUserId(userId);

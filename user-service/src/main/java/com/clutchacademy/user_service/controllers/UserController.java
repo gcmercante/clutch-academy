@@ -1,18 +1,17 @@
 package com.clutchacademy.user_service.controllers;
 
+import com.clutchacademy.user_service.dtos.SuccessResponse;
 import com.clutchacademy.user_service.dtos.UpdateUser;
 import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.services.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -24,43 +23,74 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(
+    public ResponseEntity<SuccessResponse<Object>> create(
             @RequestBody
             @Valid
             UserRequest user
     ) {
-        userService.create(user);
+        UserResponse result = userService.create(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return responseWithId(HttpStatus.CREATED, result);
     }
 
     @GetMapping
-    public List<UserResponse> find() {
-        return userService.find();
+    public ResponseEntity<SuccessResponse<Object>> find() {
+        List<UserResponse> result = userService.find();
+
+        return batchResponse(HttpStatus.OK, result);
     }
 
     @GetMapping("/{userId}")
-    public UserResponse findById(@PathVariable String userId) {
-        return userService.findById(userId);
+    public ResponseEntity<SuccessResponse<Object>> findById(@PathVariable String userId) {
+        UserResponse result = userService.findById(userId);
+
+        return responseWithId(HttpStatus.OK, result);
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<Void> update(
+    public ResponseEntity<SuccessResponse<Object>> update(
             @PathVariable
             String userId,
             @Valid
             @RequestBody
             UpdateUser userToUpdate
     ) {
-        userService.update(userId, userToUpdate);
+        UserResponse result = userService.update(userId, userToUpdate);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return responseWithId(HttpStatus.OK, result);
     }
 
     @PutMapping("/disable/{userId}")
     public ResponseEntity<Void> disable(@PathVariable String userId) {
         userService.disable(userId);
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    private ResponseEntity<SuccessResponse<Object>> responseWithId(HttpStatus status, UserResponse result) {
+        SuccessResponse.ResponseData<Object> data = SuccessResponse.ResponseData.builder()
+                .id(result.getUserId())
+                .resource(result)
+                .build();
+
+        SuccessResponse<Object> response = SuccessResponse.builder()
+                .status("success")
+                .data(data)
+                .build();
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    private ResponseEntity<SuccessResponse<Object>> batchResponse(HttpStatus status, List<UserResponse> result) {
+        SuccessResponse.ResponseData<Object> data = SuccessResponse.ResponseData.builder()
+                .resource(result)
+                .build();
+
+        SuccessResponse<Object> response = SuccessResponse.builder()
+                .status("success")
+                .data(data)
+                .build();
+
+        return ResponseEntity.status(status).body(response);
     }
 }

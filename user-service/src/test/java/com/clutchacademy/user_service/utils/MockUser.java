@@ -16,6 +16,11 @@ public class MockUser {
         UNSUPPORTED_USER_TYPE
     }
 
+    public enum InvalidMockType {
+        VALIDATION_ERROR,
+        EMPTY_BODY
+    }
+
     public static UserRequest getMockUserRequest(MockType mockType, UserType userType) {
         UserRequest mock = new UserRequest();
 
@@ -36,6 +41,27 @@ public class MockUser {
                 mock.setLastName("Doe");
                 mock.setEmail("test@mail.com");
                 mock.setUserType(UserType.valueOf("UNKNOWN"));
+            }
+        }
+
+        return mock;
+    }
+
+    public static UserRequest getMockInvalidUserRequest(InvalidMockType type) {
+        UserRequest mock = new UserRequest();
+
+        switch (type) {
+            case VALIDATION_ERROR -> {
+                mock.setFirstName("John");
+                mock.setLastName("Doe");
+                mock.setEmail("invalid-email");
+                mock.setUserType(UserType.STUDENT);
+            }
+            case EMPTY_BODY -> {
+                mock.setFirstName("");
+                mock.setLastName("Doe");
+                mock.setEmail("");
+                mock.setUserType(UserType.STUDENT);
             }
         }
 

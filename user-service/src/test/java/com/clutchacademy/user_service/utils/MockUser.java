@@ -11,7 +11,6 @@ public class MockUser {
 
     public enum MockType {
         PAYLOAD,
-        FROM_DB,
         USER_TYPE_NULL,
         UNSUPPORTED_USER_TYPE
     }

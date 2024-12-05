@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,7 +51,6 @@ public class UserService {
             throw new EntityExistsException("User with email " + user.getEmail() + " already exists");
         }
 
-        // TODO: Change that switch to a Factory
         switch (user.getUserType()) {
             case STUDENT -> {
                 Student student = new Student();
@@ -72,6 +70,7 @@ public class UserService {
         }
     }
 
+    
     public UserResponse update(String userId, UpdateUser updateUser) {
         Optional<User> optionalUser = studentRepository.findByUserId(userId)
                 .map(user -> (User) user)
@@ -82,7 +81,7 @@ public class UserService {
         }
 
         User user = optionalUser.get();
-
+        
         Field[] fields = UpdateUser.class.getDeclaredFields();
 
         for (Field field : fields) {
@@ -95,7 +94,7 @@ public class UserService {
                     userField.setAccessible(true);
                     userField.set(user, value);
                 }
-            } catch (NoSuchFieldError | IllegalAccessException | NoSuchFieldException exception) {
+            } catch (NoSuchFieldException | IllegalAccessException exception) {
                 throw new RuntimeException("Error updating user field: " + field.getName(), exception);
             }
         }
@@ -156,7 +155,6 @@ public class UserService {
         target.setEmail(source.getEmail());
     }
 
-    // TODO: put that mapper into a mappers folder as a static function
     private UserResponse mapUserResponse(User source) {
         return UserResponse
                 .builder()

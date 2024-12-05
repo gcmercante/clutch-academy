@@ -10,12 +10,4 @@ public enum UserType {
     INSTRUCTOR,
     @JsonEnumDefaultValue
     UNKNOWN;
-
-    public static UserType fromString(String value) {
-        try {
-            return UserType.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return UNKNOWN;
-        }
-    }
 }

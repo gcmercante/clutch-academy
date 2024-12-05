@@ -11,6 +11,7 @@ import com.clutchacademy.user_service.repositories.InstructorRepository;
 import com.clutchacademy.user_service.repositories.StudentRepository;
 import com.clutchacademy.user_service.services.UserService;
 import com.clutchacademy.user_service.utils.MockUser;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -136,6 +139,23 @@ class UserServiceTests {
 
             verify(studentRepository, times(1)).findByUserId("someId");
             verify(instructorRepository, times(1)).findByUserId("someId");
+        }
+
+        @Test
+        void testUpdateUserWithNullValue() {
+            String userId = student.getUserId();
+            updateUser.setFirstName(null); // Setting a field to null
+
+            when(studentRepository.findByUserId(userId)).thenReturn(Optional.of(student));
+            when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            UserResponse response = userService.update(userId, updateUser);
+
+            assertNotNull(response);
+            assertEquals(userId, response.getUserId());
+
+            verify(studentRepository, times(1)).findByUserId(userId);
+            verify(studentRepository, times(1)).save(student);
         }
     }
 

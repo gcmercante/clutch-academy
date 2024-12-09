@@ -1,16 +1,13 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:latest
     container_name: postgres_db
     environment:
-      POSTGRES_USER: ${SQL_DB_USER}
-      POSTGRES_PASSWORD: ${SQL_DB_PASSWORD}
-      POSTGRES_DB: ${SQL_DB_NAME}
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: clutch_academy
     ports:
       - "5432:5432"
-
   user-service:
     container_name: user-service
     build:
@@ -18,7 +15,5 @@ services:
       dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: ${SERVICE_PROFILE}
-    depends_on:
-      - postgres
     ports:
       - "8080:8080"

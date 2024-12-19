@@ -2,13 +2,19 @@ package com.clutchacademy.user_service.models;
 
 import com.clutchacademy.user_service.enums.UserType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
-@MappedSuperclass
+@Entity
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private int id;
 
     @Column(nullable = false)
@@ -26,6 +32,6 @@ public class User {
     @Column(nullable = false)
     private String email;
 
-    @Transient
+    @Column(nullable = false)
     private UserType type;
 }

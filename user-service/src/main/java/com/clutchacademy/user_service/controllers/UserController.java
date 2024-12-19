@@ -6,7 +6,6 @@ import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.services.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }

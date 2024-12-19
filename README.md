@@ -1,49 +1,47 @@
 # Clutch Academy Services
 
-## course-service (mongoDB)
-### Responsabilidades
-- Criar e salvar cursos
-- Retornar todos cursos disponiveis
-- Retornar cursos com base em um filtro (categoria, nome, instrutor)
-- Desativar um curso
-- Atualizar um curso
+The goal of this project is to study various languages and frameworks while developing a microservices architecture for an eSports-focused learning platform.
+
+## course-service (MongoDB)
+### Responsibilities
+- Create and save courses
+- Retrieve all available courses
+- Retrieve courses based on a filter (category, name, instructor)
+- Deactivate a course
+- Update a course
 
 ## user-service
-### Responsabilidade
-- Criar novos usuarios e instrutores
-- Desativar usuarios e instrutores
-- Atualizar usuarios e instrutores
-- Retornar informação de usuários e instrutores (baseado na autenticação)
+### Responsibilities
+- Create new users and instructors
+- Deactivate users and instructors
+- Update users and instructors
+- Retrieve user and instructor information (based on authentication)
 ### Tech Stack
 - Java 21
 - Spring Boot 3
 - PostgreSQL
 ### TODO
-- Autenticação (quando auth-service estiver pronto)
-    - Alterar endpoints GET para retornar os resultados baseado na autenticação
-- Monitoramento (quando monitoring-service estiver pronto)
-- Lidar com as rotas de Admins
+- Authentication (when auth-service is ready)
+    - Modify GET endpoints to return results based on authentication
+- Monitoring (when monitoring-service is ready)
+- Handle Admin routes
 
-## auth-service (keycloak?)
-### Responsabilidades
-- Autenticar usuarios e instrutores
-- Manejar o permissionamento dos endpoints dos serviços (Ex.: user normal não pode ter acesso a alterar o curso de alguma forma)
+## auth-service (Keycloak?)
+### Responsibilities
+- Authenticate users and instructors
+- Manage endpoint permissions for services (e.g., a regular user cannot modify a course)
 
-## upload-service (streaming http2?)
-### Responsabilidades
-- Receber arquivos de video e ou outros tipos de arquivos e salva-los na nuvem
-- Retornar os arquivos salvos que estão atrelados a determinado curso
+## upload-service (HTTP2 streaming?)
+### Responsibilities
+- Receive video files and other types of files and save them to the cloud
+- Return saved files associated with a specific course
 
-## monitoring-service (kafka/rabbitmq/Elasticsearch)
-### Responsabilidades
-- Monitoramento de todos os serviços
-- Irá fazer o log de maneira centralizada de todos os serviços
-- Enviar notificações de estado dos serviços caso esteja em estado critico
+## monitoring-service (Kafka/RabbitMQ/Elasticsearch)
+### Responsibilities
+- Monitor all services
+- Centralized logging for all services
+- Send notifications about service status if critical
 
-## global-api (go?)
-### Responsabilidades
-- Facilitar a integração do futuro frontend com os serviços backend
-- Somente fará a ponte entre o front e o backend, não irá conhecer regras de negócio, exceto autenticação correta
-
-## Pipelines?
-## Jenkins? Kubernetes?
+## global-api (Go?)
+### Responsibilities
+- Facilitate the integration of the future frontend with the backend services

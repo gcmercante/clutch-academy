@@ -5,10 +5,8 @@ import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.enums.UserType;
 import com.clutchacademy.user_service.exceptions.HttpNotFoundException;
-import com.clutchacademy.user_service.models.Instructor;
-import com.clutchacademy.user_service.models.Student;
-import com.clutchacademy.user_service.repositories.InstructorRepository;
-import com.clutchacademy.user_service.repositories.StudentRepository;
+import com.clutchacademy.user_service.models.User;
+import com.clutchacademy.user_service.repositories.UserRepository;
 import com.clutchacademy.user_service.services.UserService;
 import com.clutchacademy.user_service.utils.MockUser;
 
@@ -32,15 +30,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTests {
     @Mock
-    private StudentRepository studentRepository;
-
-    @Mock
-    private InstructorRepository instructorRepository;
+    private UserRepository userRepository;
 
     private final UserRequest studentPayload = MockUser.getMockUserRequest(MockUser.MockType.PAYLOAD, UserType.STUDENT);
-    private final Student student = MockUser.getMockStudent();
+    private final User student = MockUser.getMockUser(UserType.STUDENT);
     private final UserRequest instructorPayload = MockUser.getMockUserRequest(MockUser.MockType.PAYLOAD, UserType.INSTRUCTOR);
-    private final Instructor instructor = MockUser.getMockInstructor();
+    private final User instructor = MockUser.getMockUser(UserType.INSTRUCTOR);
     private final UserRequest userTypeNull = MockUser.getMockUserRequest(MockUser.MockType.USER_TYPE_NULL, UserType.UNKNOWN);
     private final UserRequest userTypeUnsupported = MockUser.getMockUserRequest(MockUser.MockType.UNSUPPORTED_USER_TYPE, UserType.UNKNOWN);
     private final UpdateUser updateUser = MockUser.getMockUpdateUser();
@@ -52,26 +47,26 @@ class UserServiceTests {
     class CreateTests {
         @Test
         void create_ShouldCreateStudent_WhenUserTypeIsStudent() {
-            when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             UserResponse result = userService.create(studentPayload);
 
             assertThat(result.getUserId()).startsWith("STU-");
             assertThat(result.getActive()).isTrue();
 
-            verify(studentRepository, times(1)).save(any(Student.class));
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
         void create_ShouldCreateInstructor_WhenUserTypeIsInstructor() {
-            when(instructorRepository.save(any(Instructor.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             UserResponse result = userService.create(instructorPayload);
 
             assertThat(result.getUserId()).startsWith("INS-");
             assertThat(result.getActive()).isTrue();
 
-            verify(instructorRepository, times(1)).save(any(Instructor.class));
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
@@ -80,8 +75,7 @@ class UserServiceTests {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("User cannot be null");
 
-            verifyNoInteractions(studentRepository);
-            verifyNoInteractions(instructorRepository);
+            verifyNoInteractions(userRepository);
         }
 
         @Test
@@ -90,8 +84,7 @@ class UserServiceTests {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("User type must be defined");
 
-            verifyNoInteractions(studentRepository);
-            verifyNoInteractions(instructorRepository);
+            verifyNoInteractions(userRepository);
         }
 
         @Test
@@ -106,39 +99,39 @@ class UserServiceTests {
     class UpdateTests {
         @Test
         void update_ShouldUpdateStudentNameSuccessfully() {
-            when(studentRepository.findByUserId(student.getUserId())).thenReturn(Optional.of(student));
-            when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.findByUserId(student.getUserId())).thenReturn(Optional.of(student));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             UserResponse updatedStudent = userService.update(student.getUserId(), updateUser);
 
             assertThat(updatedStudent.getFirstName()).isEqualTo(updateUser.getFirstName());
             assertThat(updatedStudent.getLastName()).isEqualTo(updateUser.getLastName());
-            verify(studentRepository, times(1)).save(student);
+            verify(userRepository, times(1)).save(student);
         }
 
         @Test
         void update_ShouldUpdateInstructorNameSuccessfully() {
-            when(instructorRepository.findByUserId(instructor.getUserId())).thenReturn(Optional.of(instructor));
-            when(instructorRepository.save(any(Instructor.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.findByUserId(instructor.getUserId())).thenReturn(Optional.of(instructor));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             UserResponse updatedInstructor = userService.update(instructor.getUserId(), updateUser);
 
             assertThat(updatedInstructor.getFirstName()).isEqualTo(updateUser.getFirstName());
             assertThat(updatedInstructor.getLastName()).isEqualTo(updateUser.getLastName());
-            verify(instructorRepository, times(1)).save(instructor);
+            verify(userRepository, times(1)).save(instructor);
         }
 
         @Test
         void updateUser_ShouldThrowException_WhenUserNotFound() {
-            when(studentRepository.findByUserId("someId")).thenReturn(Optional.empty());
-            when(instructorRepository.findByUserId("someId")).thenReturn(Optional.empty());
+            when(userRepository.findByUserId("someId")).thenReturn(Optional.empty());
+            when(userRepository.findByUserId("someId")).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.update("someId", updateUser))
                     .isInstanceOf(HttpNotFoundException.class)
                     .hasMessageContaining("User with ID someId not found");
 
-            verify(studentRepository, times(1)).findByUserId("someId");
-            verify(instructorRepository, times(1)).findByUserId("someId");
+            verify(userRepository, times(1)).findByUserId("someId");
+            verify(userRepository, times(1)).findByUserId("someId");
         }
 
         @Test
@@ -146,16 +139,16 @@ class UserServiceTests {
             String userId = student.getUserId();
             updateUser.setFirstName(null); // Setting a field to null
 
-            when(studentRepository.findByUserId(userId)).thenReturn(Optional.of(student));
-            when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.of(student));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             UserResponse response = userService.update(userId, updateUser);
 
             assertNotNull(response);
             assertEquals(userId, response.getUserId());
 
-            verify(studentRepository, times(1)).findByUserId(userId);
-            verify(studentRepository, times(1)).save(student);
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).save(student);
         }
     }
 
@@ -164,7 +157,7 @@ class UserServiceTests {
         @Test
         void findById_ShouldReturnExistingStudent(){
             String userId = student.getUserId();
-            when(studentRepository.findByUserId(userId)).thenReturn(Optional.of(student));
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.of(student));
 
             UserResponse returnedStudent = userService.findById(userId);
 
@@ -172,13 +165,13 @@ class UserServiceTests {
             assertThat(returnedStudent.getUserId()).startsWith("STU");
             assertThat(returnedStudent).isInstanceOf(UserResponse.class);
 
-            verify(studentRepository, times(1)).findByUserId(student.getUserId());
+            verify(userRepository, times(1)).findByUserId(student.getUserId());
         }
 
         @Test
         void findById_ShouldReturnExistingInstructor(){
             String userId = instructor.getUserId();
-            when(instructorRepository.findByUserId(userId)).thenReturn(Optional.of(instructor));
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.of(instructor));
 
             UserResponse returnedStudent = userService.findById(userId);
 
@@ -186,21 +179,21 @@ class UserServiceTests {
             assertThat(returnedStudent.getUserId()).startsWith("INS");
             assertThat(returnedStudent).isInstanceOf(UserResponse.class);
 
-            verify(instructorRepository, times(1)).findByUserId(instructor.getUserId());
+            verify(userRepository, times(1)).findByUserId(instructor.getUserId());
         }
 
         @Test
         void findById_ShouldThrowHttpNotFoundException() {
             String userId = "anyId";
-            when(studentRepository.findByUserId(userId)).thenReturn(Optional.empty());
-            when(instructorRepository.findByUserId(userId)).thenReturn(Optional.empty());
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.findById(userId))
                     .isInstanceOf(HttpNotFoundException.class)
                     .hasMessage("User with ID " + userId + " not found");
 
-            verify(studentRepository, times(1)).findByUserId(userId);
-            verify(instructorRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).findByUserId(userId);
         }
     }
     
@@ -208,8 +201,7 @@ class UserServiceTests {
     class FindTests {
         @Test
         void find_ShouldReturnListOfUsers() {
-            when(studentRepository.findAll()).thenReturn(List.of(student));
-            when(instructorRepository.findAll()).thenReturn(List.of(instructor));
+            when(userRepository.findAll()).thenReturn(List.of(student, instructor));
 
             List<UserResponse> users = userService.find();
 
@@ -217,21 +209,21 @@ class UserServiceTests {
             assertThat(users.size()).isEqualTo(2);
             assertThat(users).allMatch(Objects::nonNull);
 
-            verify(studentRepository, times(1)).findAll();
-            verify(instructorRepository, times(1)).findAll();
+            verify(userRepository, times(1)).findAll();
+            verify(userRepository, times(1)).findAll();
         }
 
         @Test
         void find_ShouldReturnEmptyListOfUsers() {
-            when(studentRepository.findAll()).thenReturn(List.of());
-            when(instructorRepository.findAll()).thenReturn(List.of());
+            when(userRepository.findAll()).thenReturn(List.of());
+            when(userRepository.findAll()).thenReturn(List.of());
 
             List<UserResponse> users = userService.find();
 
             assertThat(users).isEmpty();
 
-            verify(studentRepository, times(1)).findAll();
-            verify(instructorRepository, times(1)).findAll();
+            verify(userRepository, times(1)).findAll();
+            verify(userRepository, times(1)).findAll();
         }
     }
 
@@ -240,47 +232,47 @@ class UserServiceTests {
         @Test
         void disable_ShouldDeactivateStudentByUserId() {
             String userId = student.getUserId();
-            when(studentRepository.findByUserId(userId)).thenReturn(Optional.of(student));
-            when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.of(student));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            Student deactivatedUser = (Student) userService.disable(userId);
+            User deactivatedUser = userService.disable(userId);
 
             assertThat(deactivatedUser.getActive()).isFalse();
             assertThat(deactivatedUser.getUserId()).isEqualTo(userId);
             assertThat(deactivatedUser.getUserId()).startsWith("STU-");
 
-            verify(studentRepository, times(1)).findByUserId(userId);
-            verify(studentRepository, times(1)).save(any(Student.class));
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
         void disable_ShouldDeactivateInstructorByUserId() {
             String userId = instructor.getUserId();
-            when(instructorRepository.findByUserId(userId)).thenReturn(Optional.of(instructor));
-            when(instructorRepository.save(any(Instructor.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.of(instructor));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            Instructor deactivatedUser = (Instructor) userService.disable(userId);
+            User deactivatedUser = userService.disable(userId);
 
             assertThat(deactivatedUser.getActive()).isFalse();
             assertThat(deactivatedUser.getUserId()).isEqualTo(userId);
             assertThat(deactivatedUser.getUserId()).startsWith("INS-");
 
-            verify(instructorRepository, times(1)).findByUserId(userId);
-            verify(instructorRepository, times(1)).save(any(Instructor.class));
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).save(any(User.class));
         }
 
         @Test
         void disable_ShouldThrowIllegalArgumentExceptionWhenUserIdNotFound() {
             String userId = "anyId";
-            when(studentRepository.findByUserId(userId)).thenReturn(Optional.empty());
-            when(instructorRepository.findByUserId(userId)).thenReturn(Optional.empty());
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+            when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.disable(userId))
                     .isInstanceOf(HttpNotFoundException.class)
                     .hasMessage("User with ID " + userId + " not found");
 
-            verify(studentRepository, times(1)).findByUserId(userId);
-            verify(instructorRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).findByUserId(userId);
+            verify(userRepository, times(1)).findByUserId(userId);
         }
     }
 }

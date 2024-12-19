@@ -3,8 +3,7 @@ package com.clutchacademy.user_service.utils;
 import com.clutchacademy.user_service.dtos.UpdateUser;
 import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.enums.UserType;
-import com.clutchacademy.user_service.models.Instructor;
-import com.clutchacademy.user_service.models.Student;
+import com.clutchacademy.user_service.models.User;
 
 public class MockUser {
     private MockUser() {}
@@ -67,26 +66,16 @@ public class MockUser {
         return mock;
     }
 
-    public static Student getMockStudent() {
-        Student mock = new Student();
+    public static User getMockUser(UserType userType) {
+        User mock = new User();
+        String prefix = userType == UserType.STUDENT ? "STU-" : "INS-";
 
-        mock.setUserId("STU-123456");
+        mock.setUserId(prefix + "123456");
         mock.setFirstName("John");
         mock.setLastName("Doe");
         mock.setActive(true);
         mock.setEmail("test@mail.com");
-
-        return mock;
-    }
-
-    public static Instructor getMockInstructor() {
-        Instructor mock = new Instructor();
-
-        mock.setUserId("INS-123456");
-        mock.setFirstName("John");
-        mock.setLastName("Doe");
-        mock.setActive(true);
-        mock.setEmail("test@mail.com");
+        mock.setType(userType);
 
         return mock;
     }

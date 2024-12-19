@@ -1,0 +1,41 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://clutchacademydb:5432/clutch-academy
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    depends_on:
+      - clutchacademydb
+    ports:
+      - 9090:8080
+
+  clutchacademydb:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-config/custom_pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ./postgres-config/custom_postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+    environment:
+      POSTGRES_DB: clutch-academy
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+
+volumes:
+  postgres_data:

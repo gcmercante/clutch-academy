@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
                             .fieldName(violation.getField())
                             .rejectedValue(Objects.isNull(violation.getRejectedValue())
                                     ? null
-                                    : violation.getRejectedValue().toString()
+                                    : Objects.toString(violation.getRejectedValue(), null)
                             ).build();
                 })
                 .toList();

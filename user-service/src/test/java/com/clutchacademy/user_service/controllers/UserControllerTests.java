@@ -60,8 +60,7 @@ class UserControllerTests {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute("DELETE FROM students");
-        jdbcTemplate.execute("DELETE FROM instructors");
+        jdbcTemplate.execute("DELETE FROM users");
     }
 
     @Nested

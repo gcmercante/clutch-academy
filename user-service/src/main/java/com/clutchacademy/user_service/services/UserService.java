@@ -5,13 +5,10 @@ import com.clutchacademy.user_service.dtos.UserRequest;
 import com.clutchacademy.user_service.dtos.UserResponse;
 import com.clutchacademy.user_service.enums.UserType;
 import com.clutchacademy.user_service.exceptions.HttpNotFoundException;
-import com.clutchacademy.user_service.models.Instructor;
-import com.clutchacademy.user_service.models.Student;
 import com.clutchacademy.user_service.models.User;
-import com.clutchacademy.user_service.repositories.InstructorRepository;
-import com.clutchacademy.user_service.repositories.StudentRepository;
+import com.clutchacademy.user_service.repositories.UserRepository;
+
 import jakarta.persistence.EntityExistsException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -19,20 +16,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class UserService {
-    private final StudentRepository studentRepository;
-    private final InstructorRepository instructorRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
     public UserService(
-            StudentRepository studentRepository,
-            InstructorRepository instructorRepository
+            UserRepository studentRepository
     ) {
-        this.studentRepository = studentRepository;
-        this.instructorRepository = instructorRepository;
+        this.userRepository = studentRepository;
     }
 
     public UserResponse create(UserRequest user) {
@@ -44,37 +36,25 @@ public class UserService {
             throw new IllegalArgumentException("User type must be defined");
         }
 
-        Optional<User> optionalUser= studentRepository.findByEmail(user.getEmail())
-                .or(() -> instructorRepository.findByUserId(user.getEmail()));
+        Optional<User> optionalUser= userRepository.findByEmail(user.getEmail());
 
         if (optionalUser.isPresent()) {
             throw new EntityExistsException("User with email " + user.getEmail() + " already exists");
         }
 
-        switch (user.getUserType()) {
-            case STUDENT -> {
-                Student student = new Student();
-                mapCommonFields(user, student);
-
-                return mapUserResponse(studentRepository.save(student));
-            }
-
-            case INSTRUCTOR -> {
-                Instructor instructor = new Instructor();
-                mapCommonFields(user, instructor);
-
-                return mapUserResponse(instructorRepository.save(instructor));
-            }
-
-            default -> throw new IllegalArgumentException("Unsupported User type: " + user.getUserType());
+        if (user.getUserType() != UserType.STUDENT && user.getUserType() != UserType.INSTRUCTOR) {
+            throw new IllegalArgumentException("Unsupported User type: " + user.getUserType());
         }
+
+        User newUser = new User();
+        mapUserFields(user, newUser);
+
+        return mapUserResponse(userRepository.save(newUser));
     }
 
     
     public UserResponse update(String userId, UpdateUser updateUser) {
-        Optional<User> optionalUser = studentRepository.findByUserId(userId)
-                .map(user -> (User) user)
-                .or(() -> instructorRepository.findByUserId(userId));
+        Optional<User> optionalUser = userRepository.findByUserId(userId);
 
         if (optionalUser.isEmpty()) {
            throw new HttpNotFoundException("User with ID " + userId + " not found");
@@ -99,17 +79,11 @@ public class UserService {
             }
         }
 
-        if (user instanceof Student) {
-            return mapUserResponse(studentRepository.save((Student) user));
-        } else {
-            return mapUserResponse(instructorRepository.save((Instructor) user));
-        }
+        return mapUserResponse(userRepository.save(user));
     }
 
     public UserResponse findById(String userId) {
-        Optional<User> optionalUser = studentRepository.findByUserId(userId)
-                .map(user -> (User) user)
-                .or(() -> instructorRepository.findByUserId(userId));
+        Optional<User> optionalUser = userRepository.findByUserId(userId);
 
         if (optionalUser.isEmpty()) {
             throw new HttpNotFoundException("User with ID " + userId + " not found");
@@ -121,9 +95,7 @@ public class UserService {
     }
 
     public User disable(String userId) {
-        Optional<User> optionalUser = studentRepository.findByUserId(userId)
-                .map(user -> (User) user)
-                .or(() -> instructorRepository.findByUserId(userId));
+        Optional<User> optionalUser = userRepository.findByUserId(userId);
 
         if (optionalUser.isEmpty()) {
             throw new HttpNotFoundException("User with ID " + userId + " not found");
@@ -132,27 +104,20 @@ public class UserService {
         User user = optionalUser.get();
         user.setActive(false);
 
-        if (user instanceof Student) {
-            return studentRepository.save((Student) user);
-        } else {
-            return instructorRepository.save((Instructor) user);
-        }
+        return userRepository.save(user);
     }
 
     public List<UserResponse> find() {
-        List<Student> students = studentRepository.findAll();
-        List<Instructor> instructors = instructorRepository.findAll();
-
-        return Stream.concat(students.stream().map(this::mapUserResponse),
-                instructors.stream().map(this::mapUserResponse)).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(this::mapUserResponse).collect(Collectors.toList());
     }
 
-    private void mapCommonFields(UserRequest source, User target) {
+    private void mapUserFields(UserRequest source, User target) {
         target.setUserId(generateUserId(source.getUserType()));
         target.setFirstName(source.getFirstName());
         target.setLastName(source.getLastName());
         target.setActive(true);
         target.setEmail(source.getEmail());
+        target.setType(source.getUserType());
     }
 
     private UserResponse mapUserResponse(User source) {

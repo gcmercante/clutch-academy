@@ -1,10 +1,11 @@
 package com.clutchacademy.user_service.controllers;
 
-import com.clutchacademy.user_service.dtos.SuccessResponse;
-import com.clutchacademy.user_service.dtos.UpdateUser;
-import com.clutchacademy.user_service.dtos.UserRequest;
-import com.clutchacademy.user_service.dtos.UserResponse;
-import com.clutchacademy.user_service.services.UserService;
+import com.clutchacademy.user_service.domain.dtos.SuccessResponse;
+import com.clutchacademy.user_service.domain.dtos.UpdateUser;
+import com.clutchacademy.user_service.domain.dtos.UserRequest;
+import com.clutchacademy.user_service.domain.dtos.UserResponse;
+import com.clutchacademy.user_service.domain.services.UserService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

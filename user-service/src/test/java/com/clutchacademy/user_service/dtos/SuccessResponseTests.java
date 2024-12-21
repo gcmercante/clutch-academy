@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
+import com.clutchacademy.user_service.domain.dtos.SuccessResponse;
+
 public class SuccessResponseTests {
 
     @Test

@@ -1,6 +1,7 @@
-package com.clutchacademy.user_service.models;
+package com.clutchacademy.user_service.domain.models;
 
-import com.clutchacademy.user_service.enums.UserType;
+import com.clutchacademy.user_service.domain.enums.UserType;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;

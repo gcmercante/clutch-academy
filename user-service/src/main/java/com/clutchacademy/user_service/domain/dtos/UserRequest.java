@@ -1,6 +1,6 @@
-package com.clutchacademy.user_service.dtos;
+package com.clutchacademy.user_service.domain.dtos;
 
-import com.clutchacademy.user_service.enums.UserType;
+import com.clutchacademy.user_service.domain.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

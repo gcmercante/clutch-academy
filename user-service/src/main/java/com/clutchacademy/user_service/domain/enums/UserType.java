@@ -1,4 +1,4 @@
-package com.clutchacademy.user_service.enums;
+package com.clutchacademy.user_service.domain.enums;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonFormat;

@@ -1,7 +1,7 @@
 package com.clutchacademy.user_service.exceptionhandler;
 
-import com.clutchacademy.user_service.dtos.ConstraintViolation;
-import com.clutchacademy.user_service.dtos.FailResponse;
+import com.clutchacademy.user_service.domain.dtos.ConstraintViolation;
+import com.clutchacademy.user_service.domain.dtos.FailResponse;
 import com.clutchacademy.user_service.exceptions.HttpNotFoundException;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.http.HttpStatus;

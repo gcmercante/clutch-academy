@@ -1,9 +1,9 @@
 package com.clutchacademy.user_service.utils;
 
-import com.clutchacademy.user_service.dtos.UpdateUser;
-import com.clutchacademy.user_service.dtos.UserRequest;
-import com.clutchacademy.user_service.enums.UserType;
-import com.clutchacademy.user_service.models.User;
+import com.clutchacademy.user_service.domain.dtos.UpdateUser;
+import com.clutchacademy.user_service.domain.dtos.UserRequest;
+import com.clutchacademy.user_service.domain.enums.UserType;
+import com.clutchacademy.user_service.domain.models.User;
 
 public class MockUser {
     private MockUser() {}

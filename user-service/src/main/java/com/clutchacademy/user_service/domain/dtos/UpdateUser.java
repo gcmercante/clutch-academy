@@ -1,4 +1,4 @@
-package com.clutchacademy.user_service.dtos;
+package com.clutchacademy.user_service.domain.dtos;
 
 import lombok.Data;
 

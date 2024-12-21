@@ -1,6 +1,9 @@
 package com.clutchacademy.user_service.dtos;
 
 import org.junit.jupiter.api.Test;
+
+import com.clutchacademy.user_service.domain.dtos.FailResponse;
+
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,0 +1,1 @@
+org.springframework.boot.env.EnvironmentPostProcessor=com.clutchacademy.course_service.config.EnvConfig

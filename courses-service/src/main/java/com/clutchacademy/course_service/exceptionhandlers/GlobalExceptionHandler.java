@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import javax.persistence.EntityExistsException;
 
-import com.clutchacademy.course_service.api.dtos.ConstraintViolation;
-import com.clutchacademy.course_service.api.dtos.FailResponse;
+import com.clutchacademy.course_service.application.dtos.ConstraintViolation;
+import com.clutchacademy.course_service.application.dtos.FailResponse;
 import com.clutchacademy.course_service.exceptions.NotFoundException;
+import com.clutchacademy.course_service.exceptions.ServiceException;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -57,6 +58,16 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(ServiceException.class)
+    public ResponseEntity<FailResponse<?>> handleServiceException(ServiceException exception) {
+        FailResponse<?> response = FailResponse.builder()
+                .status("error")
+                .message("Internal Server Error")
+                .build();
+
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(EntityExistsException.class)

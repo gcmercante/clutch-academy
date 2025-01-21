@@ -1,23 +1,23 @@
-package com.clutchacademy.course_service.api.controllers;
+package com.clutchacademy.course_service.application.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
-import com.clutchacademy.course_service.domain.dtos.CreateCourseRequest;
-import com.clutchacademy.course_service.domain.dtos.UpdateCourseRequest;
-import com.clutchacademy.course_service.domain.models.Course;
-import com.clutchacademy.course_service.domain.services.CourseService;
+import com.clutchacademy.course_service.application.dtos.CreateCourseRequest;
+import com.clutchacademy.course_service.application.dtos.UpdateCourseRequest;
+import com.clutchacademy.course_service.application.services.CourseApplicationService;
+import com.clutchacademy.course_service.domain.entity.Course;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/courses")
 public class CourseController {
-    private final CourseService courseService;
+    private final CourseApplicationService courseService;
 
-    public CourseController(CourseService courseService) {
+    public CourseController(CourseApplicationService courseService) {
         this.courseService = courseService;
     }
 

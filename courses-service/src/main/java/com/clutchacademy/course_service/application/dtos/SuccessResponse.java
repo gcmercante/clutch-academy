@@ -1,4 +1,4 @@
-package com.clutchacademy.course_service.api.dtos;
+package com.clutchacademy.course_service.application.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,4 +1,4 @@
-package com.clutchacademy.course_service.domain.models;
+package com.clutchacademy.course_service.domain.entity;
 
 import lombok.Builder;
 import lombok.Data;

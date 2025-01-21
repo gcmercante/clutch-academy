@@ -1,4 +1,4 @@
-package com.clutchacademy.course_service.api.dtos;
+package com.clutchacademy.course_service.application.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

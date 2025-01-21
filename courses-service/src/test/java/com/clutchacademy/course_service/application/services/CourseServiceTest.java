@@ -1,4 +1,4 @@
-package com.clutchacademy.course_service.domain.services;
+package com.clutchacademy.course_service.application.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,13 +17,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.clutchacademy.course_service.domain.dtos.CreateCourseRequest;
-import com.clutchacademy.course_service.domain.dtos.UpdateCourseRequest;
-import com.clutchacademy.course_service.domain.dtos.User;
+import com.clutchacademy.course_service.application.dtos.CreateCourseRequest;
+import com.clutchacademy.course_service.application.dtos.CreateSectionsRequest;
+import com.clutchacademy.course_service.application.dtos.UpdateCourseRequest;
+import com.clutchacademy.course_service.application.dtos.User;
+import com.clutchacademy.course_service.domain.entity.Course;
 import com.clutchacademy.course_service.domain.enums.Status;
-import com.clutchacademy.course_service.domain.models.Course;
-import com.clutchacademy.course_service.domain.repositories.CoursesRepository;
 import com.clutchacademy.course_service.exceptions.NotFoundException;
+import com.clutchacademy.course_service.infra.repository.CourseRepositoryMongo;
 import com.clutchacademy.course_service.utils.CourseMock;
 import com.clutchacademy.course_service.utils.InstructorMock;
 import com.clutchacademy.course_service.utils.CourseRequestMock;
@@ -36,13 +37,13 @@ public class CourseServiceTest {
     private final UpdateCourseRequest updateRequest = CourseRequestMock.getMockUpdateCourseRequest();
 
     @Mock
-    CoursesRepository coursesRepository;
+    CourseRepositoryMongo coursesRepository;
 
     @Mock
-    UserService userService;
+    UserApplicationService userService;
 
     @InjectMocks
-    private CourseService courseService;
+    private CourseApplicationService courseService;
 
     @Nested
     class CreateCourse {
@@ -206,6 +207,41 @@ public class CourseServiceTest {
             List<Course> result = courseService.find();
 
             assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    class AddSection {
+        @Test
+        void shouldAddOneSection() {
+            final CreateSectionsRequest createSection = CourseRequestMock.getMockCreateSectionRequest();
+
+            when(coursesRepository.findById(createSection.getCourseId())).thenReturn(Optional.of(course));
+            when(coursesRepository.save(any(Course.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Course result = courseService.addSections(createSection);
+
+            verify(coursesRepository, times(1)).findById(createSection.getCourseId());
+            verify(coursesRepository, times(1)).save(any(Course.class));
+
+            assertThat(result.getId()).isEqualTo(course.getId());
+            assertThat(result.getSections()).hasSize(1);
+
+        }
+
+        @Test
+        void shouldThrowNotFoundExceptionWhenCourseNotFound() {
+            CreateSectionsRequest createSection = CourseRequestMock.getMockCreateSectionRequest();
+            createSection.setCourseId("123");
+
+            when(coursesRepository.findById(createSection.getCourseId())).thenReturn(Optional.of(course));
+
+            assertThatThrownBy(() -> courseService.addSections(createSection))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Course not found");
+
+            verify(coursesRepository, times(1)).findById(createSection.getCourseId());
+            verify(coursesRepository, times(0)).save(any(Course.class));
         }
     }
 }

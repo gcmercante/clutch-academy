@@ -1,6 +1,6 @@
 package com.clutchacademy.course_service.utils;
 
-import com.clutchacademy.course_service.domain.dtos.User;
+import com.clutchacademy.course_service.application.dtos.User;
 
 public class InstructorMock {
     public static User getMockInstructor() {

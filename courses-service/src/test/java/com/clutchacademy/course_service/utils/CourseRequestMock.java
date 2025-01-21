@@ -1,7 +1,11 @@
 package com.clutchacademy.course_service.utils;
 
-import com.clutchacademy.course_service.domain.dtos.CreateCourseRequest;
-import com.clutchacademy.course_service.domain.dtos.UpdateCourseRequest;
+import java.util.List;
+
+import com.clutchacademy.course_service.application.dtos.CreateCourseRequest;
+import com.clutchacademy.course_service.application.dtos.CreateSectionRequest;
+import com.clutchacademy.course_service.application.dtos.CreateSectionsRequest;
+import com.clutchacademy.course_service.application.dtos.UpdateCourseRequest;
 
 public class CourseRequestMock {
     public static CreateCourseRequest getMockCreateCourseRequest() {
@@ -17,5 +21,16 @@ public class CourseRequestMock {
                 .title("Mock Title")
                 .description("Mock Description")
                 .build();
+    }
+
+    public static CreateSectionsRequest getMockCreateSectionRequest() {
+        return CreateSectionsRequest.builder()
+            .sections(List.of(
+                CreateSectionRequest.builder()
+                    .title("Section 1")
+                    .description("Section 1 description")
+                    .build()
+            ))
+            .build();
     }
 }

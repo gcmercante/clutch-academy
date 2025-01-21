@@ -1,24 +1,32 @@
-package com.clutchacademy.course_service.domain.services;
+package com.clutchacademy.course_service.application.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.clutchacademy.course_service.domain.dtos.CreateCourseRequest;
-import com.clutchacademy.course_service.domain.dtos.UpdateCourseRequest;
-import com.clutchacademy.course_service.domain.dtos.User;
+import com.clutchacademy.course_service.application.dtos.CreateCourseRequest;
+import com.clutchacademy.course_service.application.dtos.CreateSectionRequest;
+import com.clutchacademy.course_service.application.dtos.CreateSectionsRequest;
+import com.clutchacademy.course_service.application.dtos.UpdateCourseRequest;
+import com.clutchacademy.course_service.application.dtos.User;
+import com.clutchacademy.course_service.domain.entity.Course;
+import com.clutchacademy.course_service.domain.entity.Section;
 import com.clutchacademy.course_service.domain.enums.Status;
-import com.clutchacademy.course_service.domain.models.Course;
-import com.clutchacademy.course_service.domain.repositories.CoursesRepository;
+import com.clutchacademy.course_service.domain.repositories.CourseRepository;
 import com.clutchacademy.course_service.exceptions.NotFoundException;
+import com.clutchacademy.course_service.utils.UUIDHandler;
 
 @Service
-public class CourseService {
-    private final CoursesRepository coursesRepository;
-    private final UserService userService;
+public class CourseApplicationService {
+    private final CourseRepository coursesRepository;
+    private final UserApplicationService userService;
 
-    public CourseService(CoursesRepository coursesRepository, UserService userService) {
+    public CourseApplicationService(
+        CourseRepository coursesRepository,
+        UserApplicationService userService
+    ) {
         this.coursesRepository = coursesRepository;
         this.userService = userService;
     }
@@ -31,7 +39,6 @@ public class CourseService {
             .description(request.getDescription())
             .owner(user)
             .status(Status.ACTIVE)
-            .sections(List.of())
             .build();
 
         Course savedCourse = coursesRepository.save(course);
@@ -93,5 +100,31 @@ public class CourseService {
 
     public List<Course> find() {
         return coursesRepository.findAll();
+    }
+
+    public Course addSections(CreateSectionsRequest request) {
+        Optional<Course> courseToUpdate = coursesRepository.findById(request.getCourseId());
+
+        if(courseToUpdate.isEmpty()) {
+            throw new NotFoundException("Course not found");
+        }
+
+        Course course = courseToUpdate.get();
+        List<Section> sections = mapToListOfSection(request.getSections());
+
+        course.addSections(sections);
+
+        return coursesRepository.save(course);
+    }
+
+    private List<Section> mapToListOfSection(List<CreateSectionRequest> sectionRequests) {
+        return sectionRequests.stream()
+            .map(section -> Section.builder()
+                .id(UUIDHandler.generateUUID())
+                .title(section.getTitle())
+                .description(section.getDescription())
+                .build()
+            )
+            .collect(Collectors.toList());
     }
 }

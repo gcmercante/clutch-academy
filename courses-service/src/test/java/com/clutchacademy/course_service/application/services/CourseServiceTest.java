@@ -234,7 +234,7 @@ public class CourseServiceTest {
             CreateSectionsRequest createSection = CourseRequestMock.getMockCreateSectionRequest();
             createSection.setCourseId("123");
 
-            when(coursesRepository.findById(createSection.getCourseId())).thenReturn(Optional.of(course));
+            when(coursesRepository.findById(createSection.getCourseId())).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> courseService.addSections(createSection))
                 .isInstanceOf(NotFoundException.class)

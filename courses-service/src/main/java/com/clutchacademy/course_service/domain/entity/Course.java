@@ -33,8 +33,6 @@ public class Course {
         for (Section section : sections) {
             this.sections.add(section);
         }
-
-        // this.sections.addAll(sections);
     }
 
     public void removeSection(Section section) {
